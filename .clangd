@@ -1,0 +1,6 @@
+Diagnostics:
+  UnusedIncludes: None
+  Suppress:
+    - "c++11-narrowing"
+    - "not_tag_in_scope"
+    - "expected"

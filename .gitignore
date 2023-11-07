@@ -1,0 +1,7 @@
+# dir
+.vscode/
+.xmake/
+build/
+
+# file
+*.pdb
