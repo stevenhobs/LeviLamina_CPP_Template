@@ -3,13 +3,15 @@ set_languages("c++20")
 add_rules("mode.debug", "mode.release")
 set_optimize("fastest")
 
---? 指定 SDK路径 和 server路径
+--[[⬇️ 指定插件文件名，SDK路径，server路径]]
+local PLUGIN_NAME = "_fake_plugin"
 local LL_SDK_PATH = "fake_sdk_path" --最后不要带 / 
 local SERVER_PATH = "fake_server_path"
+--[[⬆️ 指定插件文件名，SDK路径，server路径]]
 
+--[[⬇️ 默认默认配置代码 谨慎修改]]
 add_includedirs(LL_SDK_PATH.."/include")
 add_linkdirs(LL_SDK_PATH.."/lib")
-
 add_defines(
 	"NDEBUG",
 	"NOMINMAX",
@@ -23,7 +25,6 @@ add_defines(
 	"_WINDLL",
 	"_WINDOWS"
 )
-
 add_cxxflags(
 	-- "/diagnostics:column",
 	"/EHsc",
@@ -53,14 +54,29 @@ add_shflags(
 	"/SUBSYSTEM:CONSOLE"
 )
 
-target("_mc_plug_template")
-	set_kind("shared")
-	add_files("src/*.cpp")
+--* 功能函数
+function sdk_load(options) -- 加载 sdk，参数应当在使用PeEditor反编译服务器主程序后设定为true
+	local br_lib = options.br_lib or false
 	add_links("LiteLoader", "SymDBHelper")
-	--? 下面两个lib需要使用 SDK 中的 tools/PeEditor.exe 反编译server启动程序
-	-- add_links("bedrock_server_api", "bedrock_server_var")
+	if br_lib == true then
+	    add_links("bedrock_server_api", "bedrock_server_var")
+	end
+end
+function copy_to_server() -- 插件到服务器 plugins 文件夹
 	after_build(function (target) 
 		os.cp(target:targetfile(), SERVER_PATH.."/plugins/")
 	end)
-target_end()
+end
+function load_in_server()
+    -- todo 配置是否在 server 中加载
+end
+--[[⬆️ 默认默认配置代码 谨慎修改]]
 
+--[[⬇️ 插件目标构建]]
+target(PLUGIN_NAME)
+	set_kind("shared")
+	add_files("src/*.cpp")
+	sdk_load{br_lib = false}
+	-- copy_to_server()
+target_end()
+--[[⬆️ 插件目标构建]]
